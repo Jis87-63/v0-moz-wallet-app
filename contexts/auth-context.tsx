@@ -55,15 +55,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signIn = async (email: string, password: string) => {
+    console.log("[v0] Attempting sign in...")
     await signInWithEmailAndPassword(auth, email, password)
   }
 
   const signUp = async (email: string, password: string, displayName: string) => {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-    await createUserProfile(userCredential.user.uid, email, displayName)
+    try {
+      console.log("[v0] Creating user account...")
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      console.log("[v0] User created, creating profile...")
+      await createUserProfile(userCredential.user.uid, email, displayName)
+      console.log("[v0] Profile created successfully")
+    } catch (error: any) {
+      console.error("[v0] Sign up error:", error)
+      throw error
+    }
   }
 
   const signInWithGoogle = async () => {
+    console.log("[v0] Attempting Google sign in...")
     const result = await signInWithPopup(auth, googleProvider)
     await createUserProfile(
       result.user.uid,

@@ -24,29 +24,38 @@ export interface Transaction {
 }
 
 export const createUserProfile = async (uid: string, email: string, displayName: string, photoURL?: string) => {
-  const userRef = ref(database, `users/${uid}`)
-  const snapshot = await get(userRef)
+  try {
+    console.log("[v0] Creating user profile for:", uid)
+    const userRef = ref(database, `users/${uid}`)
+    const snapshot = await get(userRef)
 
-  if (!snapshot.exists()) {
-    const userData: UserData = {
-      uid,
-      email,
-      displayName,
-      photoURL,
-      balance: 0,
-      level: 1,
-      totalInvested: 0,
-      dailyRewardsCompleted: 0,
-      lastRewardDate: "",
-      createdAt: new Date().toISOString(),
-      transactions: [],
+    if (!snapshot.exists()) {
+      console.log("[v0] User doesn't exist, creating new profile...")
+      const userData: UserData = {
+        uid,
+        email,
+        displayName,
+        photoURL,
+        balance: 0,
+        level: 1,
+        totalInvested: 0,
+        dailyRewardsCompleted: 0,
+        lastRewardDate: "",
+        createdAt: new Date().toISOString(),
+        transactions: [],
+      }
+
+      await set(userRef, userData)
+      console.log("[v0] User profile created successfully")
+      return userData
     }
 
-    await set(userRef, userData)
-    return userData
+    console.log("[v0] User profile already exists")
+    return snapshot.val() as UserData
+  } catch (error) {
+    console.error("[v0] Error creating user profile:", error)
+    throw error
   }
-
-  return snapshot.val() as UserData
 }
 
 export const getUserData = async (uid: string): Promise<UserData | null> => {
